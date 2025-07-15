@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AQUARIO LOGIN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body {
+      background: linear-gradient(45deg, #0a0a0f, #1a0d2e, #16213e, #0f3460);
+      background-size: 400% 400%;
+      animation: moveBG 20s ease infinite;
+      font-family: 'Exo 2', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    @keyframes moveBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+    .floating-logo {
+      animation: float 3s ease-in-out infinite;
+    }
+    .login-box {
+      background: rgba(20, 20, 30, 0.95);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      padding: 2rem;
+      border-radius: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+    }
+    .neon {
+      color: #00f5ff;
+      text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 10px;
+      color: white;
+    }
+    .btn-custom {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #00f5ff, #0ff);
+      color: #111;
+      border: none;
+      border-radius: 999px;
+      font-weight: bold;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px #00f5ff99;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #ff5e6c, #ff2e63);
+      color: white;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-content {
+      background: rgba(15, 20, 30, 0.95);
+      border: 1px solid #00f5ff33;
+      padding: 2rem;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    .info-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 4px solid cyan;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      text-align: left;
+    }
+    .time-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 4px solid #00f5ff;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+    .time-box {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .btn-telegram {
+      background: linear-gradient(135deg, #0088cc, #229ED9);
+      color: white;
+      font-weight: bold;
+      padding: 0.75rem;
+      border-radius: 999px;
+      box-shadow: 0 0 10px #229ED9aa;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <img src="https://uploads.onecompiler.io/43q5w7t9a/43q5x7scu/1000037286.png" alt="AQUARIO Logo" class="floating-logo mx-auto mb-4 w-20 h-20 rounded-full shadow-lg border-2 border-sky-300" />
+    <h1 class="text-3xl neon mb-2"><i class="fab fa-angellist text-cyan-400 mr-2"></i>AQUARIO LOGIN</h1>
+
+    <input type="text" id="keyInput" placeholder=" 🔑 ENTER YOUR ACCESS KEY" />
+    <button onclick="validateKey()" class="btn-custom"><i class="fas fa-check-circle mr-1"></i>ENTER</button>
+    <a href="https://t.me/+251tOogEdLNkNTdl" target="_blank" class="btn-telegram mt-3 flex items-center justify-center gap-2">
+      <i class="fab fa-telegram-plane"></i> JOIN US
+    </a>
+    <p id="errorText" class="text-red-400 text-sm mt-2 hidden">
+      <i class="fas fa-exclamation-circle mr-1"></i><span id="errorTextMessage">Invalid Key</span>
+    </p>
+  </div>
+
+  <div class="modal" id="popupModal">
+    <div class="modal-content">
+      <img src="https://uploads.onecompiler.io/43q5w7t9a/43q5x7scu/1000037286.png" alt="AQUARIO Logo" class="floating-logo mx-auto mb-4 w-20 h-20 rounded-full shadow-lg border-2 border-cyan-300" />
+      <h2 class="text-2xl neon mb-4"><i class="fab fa-angellist text-cyan-400 mr-2"></i>AQUARIO ULTRA</h2>
+
+      <div class="info-box"><i class="fas fa-key"></i> <strong> KEY :</strong> <span id="modalKey">---</span></div>
+      <div class="info-box"><i class="fas fa-calendar"></i> <strong> CREATED AT :</strong> <span id="modalCreated">---</span></div>
+      <div class="info-box"><i class="fas fa-clock"></i> <strong> EXPIRY TIME :</strong> <span id="modalExpiry">---</span></div>
+      <div class="info-box"><i class="fas fa-bolt"></i> <strong> BEST TIME TO PLAY :</strong> 9:00 AM, 11:30 AM, 5:30 PM, 9:45 PM, 10:30 PM</div>
+
+      <div class="time-container">
+        <h3 class="text-cyan-300 font-semibold text-lg mb-2"><i class="fas fa-hourglass-half fa-spin mr-1"></i>TIME LEFT</h3>
+        <div class="grid grid-cols-4 gap-2 text-sm text-white font-semibold">
+          <div class="time-box"><div id="days">0</div><div></div></div>
+          <div class="time-box"><div id="hours">0</div><div></div></div>
+          <div class="time-box"><div id="minutes">0</div><div></div></div>
+          <div class="time-box"><div id="seconds">0</div><div></div></div>
+        </div>
+      </div>
+
+      <button onclick="goToGame()" class="btn-custom mt-4"><i class="fas fa-play mr-1"></i>GO TO GAME</button>
+      <button onclick="logout()" class="btn-custom btn-danger mt-2"><i class="fas fa-sign-out-alt mr-1"></i>LOGOUT</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDENq_gGaeC6RDkS3plfqHfyWNBH-nIkN8",
+      authDomain: "adnan-db623.firebaseapp.com",
+      databaseURL: "https://adnan-db623-default-rtdb.firebaseio.com",
+      projectId: "adnan-db623",
+      storageBucket: "adnan-db623.appspot.com",
+      messagingSenderId: "150291253420",
+      appId: "1:150291253420:web:b380ea925af7ea1f23f709"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function formatDate(ms) {
+      return new Date(ms).toLocaleString();
+    }
+
+    function updateTimerDisplay(msLeft) {
+      const totalSeconds = Math.floor(msLeft / 1000);
+      const days = Math.floor(totalSeconds / (3600 * 24));
+      const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      document.getElementById("days").textContent = days;
+      document.getElementById("hours").textContent = hours;
+      document.getElementById("minutes").textContent = minutes;
+      document.getElementById("seconds").textContent = seconds;
+    }
+
+    let countdownInterval;
+
+    function showModal(key, created, expiresAt) {
+      document.getElementById("modalKey").innerText = key;
+      document.getElementById("modalCreated").innerText = formatDate(created);
+      document.getElementById("modalExpiry").innerText = formatDate(expiresAt);
+
+      function update() {
+        const now = Date.now();
+        const remaining = expiresAt - now;
+        if (remaining <= 0) {
+          logout();
+          alert("Key expired!");
+        } else {
+          updateTimerDisplay(remaining);
+        }
+      }
+
+      clearInterval(countdownInterval);
+      update();
+      countdownInterval = setInterval(update, 1000);
+
+      document.getElementById("popupModal").style.display = "flex";
+    }
+
+    function validateKey() {
+      const key = document.getElementById("keyInput").value.trim();
+      const error = document.getElementById("errorText");
+      const errorMsg = document.getElementById("errorTextMessage");
+
+      if (!key) {
+        error.classList.remove("hidden");
+        errorMsg.innerText = "Please enter a key";
+        return;
+      }
+
+      db.ref("validKeys/" + key).once("value").then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const created = data.created || Date.now();
+          const durationMs = (data.duration || 30) * 60 * 1000;
+          const expiresAt = created + durationMs;
+
+          if (Date.now() > expiresAt) {
+            error.classList.remove("hidden");
+            errorMsg.innerText = "Key expired";
+          } else {
+            localStorage.setItem("savedKey", key);
+            localStorage.setItem("createdTime", created);
+            localStorage.setItem("expiryTime", expiresAt);
+            showModal(key, created, expiresAt);
+            error.classList.add("hidden");
+          }
+        } else {
+          error.classList.remove("hidden");
+          errorMsg.innerText = "Invalid Key";
+        }
+      }).catch(() => {
+        error.classList.remove("hidden");
+        errorMsg.innerText = "Error connecting to Firebase";
+      });
+    }
+
+    function goToGame() {
+      window.location.href = "synziomod.html";
+    }
+
+    function logout() {
+      localStorage.clear();
+      document.getElementById("popupModal").style.display = "none";
+    }
+
+    window.onload = () => {
+      const savedKey = localStorage.getItem("savedKey");
+      const created = parseInt(localStorage.getItem("createdTime"));
+      const expiresAt = parseInt(localStorage.getItem("expiryTime"));
+
+      if (savedKey && created && expiresAt && Date.now() < expiresAt) {
+        showModal(savedKey, created, expiresAt);
+      }
+    };
+  </script>
+</body>
+</html>
